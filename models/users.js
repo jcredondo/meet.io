@@ -4,48 +4,53 @@ const bcrypt = require('bcrypt-nodejs');
 
 const Users = db.define('users', {
     id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER, 
         primaryKey: true,
         autoIncrement: true
     },
-    nome: Sequelize.STRING(60),
-    imagem: Sequelize.STRING(60),
+    nome : Sequelize.STRING(60),
+    imagem : Sequelize.STRING(60),
+    descricao: Sequelize.TEXT,
     email: {
         type: Sequelize.STRING(30),
-        allowNull: false,
+        allowNull: false, 
         validate: {
-            isEmail: { msg: 'Adicona email válido' }
+            isEmail: { msg : 'Necessário email válido'}
         },
-        unique: {
+        unique : {
             args: true,
-            msg: { msg: 'User já registado' }
-        },
+            msg : 'User já registado'
+        }
     },
     password: {
         type: Sequelize.STRING(60),
         allowNull: false,
-        validate: {
-            notEmpty: {
-                msg: { msg: 'Password sem informação' }
+        validate : {
+            notEmpty : {
+                msg : 'Password vazia!'
             }
         }
-    },
-    ativo: {
+    }, 
+    activo : {
         type: Sequelize.INTEGER,
         defaultValue: 0
     },
-    tokenPassword: Sequelize.STRING,
-    expiraToken: Sequelize.DATE
+    tokenPassword : Sequelize.STRING, 
+    expiraToken : Sequelize.DATE
 }, {
-        hooks: {
-            beforeCreate(user) {
-                user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10), null);
-            }
+    hooks: {
+        beforeCreate(user) { 
+            user.password = Users.prototype.hashPassword(user.password);
         }
-    });
+    }
+});
 
-Users.prototype.validarPassword = function (password) {
+// Método para comparar los password
+Users.prototype.validarPassword = function(password) {
     return bcrypt.compareSync(password, this.password);
-};
+}
+Users.prototype.hashPassword = function(password) {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null );
+}
 
 module.exports = Users;

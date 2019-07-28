@@ -8,7 +8,15 @@ exports.users = (req, res) => {
 
 exports.novoUser = async (req, res) => {
     const user = req.body;
+    try {
+        const novoUser = await users.create(user);
 
-    const novoUser = await users.create(user);
-    console.log('User criado', novoUser);
+        console.log('User criado', novoUser);
+    } catch (error) {
+        const errosSequelize = error.errors.map(err => err.message);
+        // console.log(errosSequelize);
+        req.flash('error', errosSequelize);
+        res.redirect('/criar-conta');
+    }
+
 };
